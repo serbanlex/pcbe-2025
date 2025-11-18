@@ -1,7 +1,5 @@
 package alex.pcbe.demo.application.services;
 
-import alex.pcbe.demo.application.repositories.GuestbookRepository;
-import alex.pcbe.demo.domain.entities.GuestbookEntry;
 import alex.pcbe.demo.domain.events.GuestbookEntryAddedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
