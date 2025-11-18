@@ -1,4 +1,4 @@
-package alex.pcbe.demo.api;
+package alex.pcbe.demo.api.controllers;
 
 import alex.pcbe.demo.application.services.GuestbookService;
 import alex.pcbe.demo.api.dto.CreateGuestbookEntryRequest;

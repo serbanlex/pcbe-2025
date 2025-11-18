@@ -16,12 +16,12 @@ Only the application layer depends on the repository abstraction. Infrastructure
 |-------|---------------|------------------|------------|
 | Domain | `alex.pcbe.demo.domain.entities` | Core data structures (`GuestbookEntry`) | (None – pure Java) |
 | Application | `alex.pcbe.demo.application.services`, `alex.pcbe.demo.application.repositories` | Use cases / business operations (`GuestbookService`), repository abstraction (`GuestbookRepository`) | Domain |
-| Infrastructure | `alex.pcbe.demo.infrastructure.repositories`, `alex.pcbe.demo.infrastructure.persistence`, `alex.pcbe.demo.infrastructure.mappers`, `alex.pcbe.demo.infrastructure.config` | Technical implementations (In-memory + planned Postgres), mapping, startup tasks | Application (interfaces), Domain (models for mapping) |
+| Infrastructure | `alex.pcbe.demo.infrastructure.repositories`, `alex.pcbe.demo.infrastructure.db`, `alex.pcbe.demo.infrastructure.mappers`, `alex.pcbe.demo.infrastructure.config` | Technical implementations (In-memory + planned Postgres), mapping, startup tasks | Application (interfaces), Domain (models for mapping) |
 | Delivery (API) | `alex.pcbe.demo.controllers`, `alex.pcbe.demo.controllers.dto` | HTTP endpoints, request/response mapping | Application, Domain |
 
 ## Current Implementations
-- Active: `InMemoryGuestbookRepository` (ConcurrentHashMap)
-- Planned: `PostgresGuestbookRepository` (JPA / Hibernate + `GuestbookEntryEntity`)
+- **Active (Primary)**: `PostgresGuestbookRepository` (JPA / Hibernate + `GuestbookEntryEntity`)
+- Available: `InMemoryGuestbookRepository` (ConcurrentHashMap) - useful for testing
 - Mapper: `GuestbookEntryMapper` converts between JPA entity and domain model.
 
 ## Domain Model
@@ -49,10 +49,11 @@ Domain objects are created inside the service (factory-style via constructor) en
 - Simple, thread-safe storage via `ConcurrentHashMap`.
 - Useful for local dev and tests.
 
-### PostgresGuestbookRepository (Planned/Scaffolded)
+### PostgresGuestbookRepository (Active - @Primary)
 - Relies on Spring Data JPA (`JpaGuestbookRepository`) + `GuestbookEntryEntity`.
 - Mapping layer (`GuestbookEntryMapper`) isolates JPA annotations from domain.
-- Marked `@Primary` when active to override in-memory implementation.
+- Marked `@Primary` to override in-memory implementation as the default.
+- Automatically creates database and table schema on startup.
 
 ### Database Initialization
 `DatabaseInitializer` ensures the configured PostgreSQL database exists (creating it if missing) using a connection to the default `postgres` catalog.
@@ -109,10 +110,11 @@ HTTP GET /guestbook
 - Constructor injection promotes immutability and clear dependencies.
 
 ## Future Improvements
-- Explicit validation layer (Bean Validation) once JPA active.
+- Explicit validation layer (Bean Validation).
 - Observability (structured logging, metrics).
 - Migration tool (Flyway/Liquibase) instead of `ddl-auto=update`.
 - Replace direct DB creation with provisioning in infrastructure scripts.
+- Integration tests for PostgreSQL repository.
 
 ## Reference Diagram
 ```
@@ -120,11 +122,13 @@ HTTP GET /guestbook
 Request --> | GuestbookController | --> GuestbookService --> GuestbookRepository (interface)
             +---------------------+                               ^
                                                                   |
-                           (InMemoryGuestbookRepository) OR (PostgresGuestbookRepository)
+                                               PostgresGuestbookRepository (@Primary)
+                                                         |
+                                                   +-----+-----+
+                                                   |           |
+                                          GuestbookEntryMapper  JpaGuestbookRepository
+                                                                     |
+                                                               PostgreSQL DB
+                                                               
+Alternative (for testing): InMemoryGuestbookRepository
 ```
-
-## How to Read This File
-Use this as the source of truth for layering and allowed dependencies when contributing new features.
-
----
-_Last updated: 2025-11-18_
