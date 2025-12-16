@@ -31,21 +31,29 @@ Content-Type: application/json
 ```
 
 ## Quick Start
-### Run the application
+
+### Run locally
 ```bash
 ./gradlew bootRun
 ```
-(Default port: 8081)
+(Default port: 8080)
+
+### Run with Docker
+See [DOCKER.md](DOCKER.md) for containerization instructions.
+```bash
+docker build -t guestbook-app-dummy-image .
+docker run -p 8080:8080 -it guestbook-app-dummy-image --name guestbook-app-dummy-container
+```
 
 ### Test with curl
 ```bash
 # Create an entry
-curl -X POST http://localhost:8081/guestbook \
+curl -X POST http://localhost:8080/guestbook \
   -H "Content-Type: application/json" \
   -d '{"name":"Bob","message":"I liked it here"}'
 
 # List entries
-curl http://localhost:8081/guestbook
+curl http://localhost:8080/guestbook
 ```
 
 ## Architecture Overview
