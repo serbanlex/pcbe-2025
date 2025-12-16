@@ -27,13 +27,13 @@ This approach keeps the final image small since it does not include the JDK or b
 ### Build the image
 
 ```bash
-docker build -t guestbook-app .
+docker build -t guestbook-dummy-app .
 ```
 
 ### Run the container
 
 ```bash
-docker run -p 8080:8080 guestbook-app
+docker run -p 8080:8080 guestbook-dummy-app --name guestbook-dummy-app-container
 ```
 
 The application will be available at http://localhost:8080
