@@ -11,7 +11,6 @@ A simple Spring Boot application demonstrating a layered architecture (domain, a
   - Hibernate auto-generates tables based on `GuestbookEntryEntity`
 - Alternative implementation: In-memory (`InMemoryGuestbookRepository`) using a ConcurrentHashMap - available but not active
 - Domain model: `GuestbookEntry` (id, name, message, createdAt)
-- See [POSTGRESQL_SETUP.md](docs/POSTGRESQL_SETUP.md) for PostgreSQL setup instructions
 
 ## API Endpoints
 1. GET `/guestbook` – Retrieve all guestbook entries.
@@ -36,17 +35,24 @@ Content-Type: application/json
 ```
 
 ## Quick Start
-### Prerequisites
-- Java 21+ installed
-- PostgreSQL running on localhost:5432 (see [POSTGRESQL_SETUP.md](docs/POSTGRESQL_SETUP.md) for setup)
 
-### Run the application
+### Run with Docker Compose (Recommended)
+This starts the app, PostgreSQL, and pgAdmin together:
+```bash
+docker-compose up --build
+```
+
+Services will be available at:
+- **Application**: http://localhost:8080
+- **pgAdmin**: http://localhost:5050 (login: admin@admin.com / admin)
+
+See [DOCKER.md](DOCKER.md) for more details.
+
+### Run locally (requires local PostgreSQL)
 ```bash
 ./gradlew bootRun
 ```
 (Default port: 8080)
-
-Or run directly from IntelliJ IDEA by running `DemoApplication.java`
 
 ### Test with curl
 ```bash

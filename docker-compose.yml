@@ -1,0 +1,47 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16
+    container_name: guestbook-postgres
+    environment:
+      POSTGRES_USER: alex
+      POSTGRES_PASSWORD: pcbe
+      POSTGRES_DB: guestbook_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alex -d guestbook_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin - Database Management UI
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: guestbook-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  # Spring Boot Application
+  app:
+    build: .
+    container_name: guestbook-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/guestbook_db
+      SPRING_DATASOURCE_USERNAME: alex
+      SPRING_DATASOURCE_PASSWORD: pcbe
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
