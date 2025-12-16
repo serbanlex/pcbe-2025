@@ -2,7 +2,7 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:16
-    container_name: guestbook-postgres
+    container_name: guestbook-app-pg-postgres
     environment:
       POSTGRES_USER: alex
       POSTGRES_PASSWORD: pcbe
@@ -20,7 +20,7 @@ services:
   # pgAdmin - Database Management UI
   pgadmin:
     image: dpage/pgadmin4
-    container_name: guestbook-pgadmin
+    container_name: guestbook-app-pg-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -32,7 +32,7 @@ services:
   # Spring Boot Application
   app:
     build: .
-    container_name: guestbook-app
+    container_name: guestbook-app-pg
     ports:
       - "8080:8080"
     environment:

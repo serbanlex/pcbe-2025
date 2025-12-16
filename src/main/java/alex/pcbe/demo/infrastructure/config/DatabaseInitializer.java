@@ -21,7 +21,6 @@ public class DatabaseInitializer implements BeanFactoryPostProcessor, Environmen
 
     private Environment environment;
     private static final String DB_NAME = "guestbook_db";
-    private static final String POSTGRES_URL = "jdbc:postgresql://localhost:5432/postgres";
 
     @Override
     public void setEnvironment(Environment environment) {
@@ -32,15 +31,39 @@ public class DatabaseInitializer implements BeanFactoryPostProcessor, Environmen
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         String username = environment.getProperty("spring.datasource.username");
         String password = environment.getProperty("spring.datasource.password");
+        String datasourceUrl = environment.getProperty("spring.datasource.url");
+        
+        // Extract host:port from datasource URL (jdbc:postgresql://host:port/dbname)
+        String postgresUrl = buildPostgresAdminUrl(datasourceUrl);
+        
         try {
-            createDatabaseIfNotExists(username, password);
+            createDatabaseIfNotExists(postgresUrl, username, password);
         } catch (SQLException e) {
             throw new BeansException("Failed to create database", e) {};
         }
     }
 
-    private void createDatabaseIfNotExists(String username, String password) throws SQLException {
-        try (Connection conn = DriverManager.getConnection(POSTGRES_URL, username, password);
+    /**
+     * Builds the admin postgres URL from the datasource URL.
+     * Connects to the default 'postgres' database to create our target database.
+     */
+    private String buildPostgresAdminUrl(String datasourceUrl) {
+        // Default fallback for local development
+        if (datasourceUrl == null) {
+            return "jdbc:postgresql://localhost:5432/postgres";
+        }
+        
+        // Extract host:port from jdbc:postgresql://host:port/dbname
+        // Result: jdbc:postgresql://host:port/postgres
+        int lastSlash = datasourceUrl.lastIndexOf('/');
+        if (lastSlash > 0) {
+            return datasourceUrl.substring(0, lastSlash) + "/postgres";
+        }
+        return "jdbc:postgresql://localhost:5432/postgres";
+    }
+
+    private void createDatabaseIfNotExists(String postgresUrl, String username, String password) throws SQLException {
+        try (Connection conn = DriverManager.getConnection(postgresUrl, username, password);
              Statement stmt = conn.createStatement()) {
 
             // Check if database exists
@@ -58,4 +81,3 @@ public class DatabaseInitializer implements BeanFactoryPostProcessor, Environmen
         }
     }
 }
-
